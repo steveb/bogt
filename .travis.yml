@@ -6,5 +6,5 @@ before_install:
   - sudo apt-get install -y libasound2-dev
 install:
 - pip install .
-- pip install -r requirements.txt -r test-requrements.txt
+- pip install -r requirements.txt -r test-requirements.txt
 script: testr init && testr run
