@@ -28,7 +28,7 @@ def midi():
     return table('MIDI')
 
 
-def table_name(self, block):
+def table_name(block):
     if block == 0x0:
         return 'SYSTEM'
     if block == 0x2:
@@ -38,12 +38,12 @@ def table_name(self, block):
     raise ValueError('Unknown address block: %02x', block)
 
 
-def table_entry(self, table_name, table_key):
+def table_entry(table_name, table_key):
     t = table(table_name)
     try:
         return t[table_key]
     except KeyError:
-        raise ValueError('Unknown key in  %s: %s' % (table_name, table_key))
+        raise ValueError('Unknown key in %s: %s' % (table_name, table_key))
 
 
 def _load_tables():
