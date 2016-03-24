@@ -23,7 +23,4 @@ class ParseData(command.Command):
         mid = mido.MidiFile(parsed_args.filename)
         parsed = parsed_sysex.midi_to_parsed(mid, split=False)
         for ps in parsed:
-            print('%s == %s' % (ps.checksum, ps.calculate_checksum()))
-            print('%s' % ps)
-            # parsed_split.extend(ps.split(prev_ps))
-            # prev_ps = ps
+            self.app.stdout.write('%s\n' % ps)
