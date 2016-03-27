@@ -1,9 +1,11 @@
 
+import collections
 import json
 import os
 
 
 _tables = None
+_max_table_keys = collections.defaultdict(int)
 
 
 def table(table_name):
@@ -43,7 +45,18 @@ def table_entry(table_name, table_key):
     try:
         return t[table_key]
     except KeyError:
-        raise ValueError('Unknown key in %s: %s' % (table_name, table_key))
+        raise ValueError('Unknown key in %s: %s' % (
+            table_name, hex(table_key)))
+
+
+def next_table_key(table_name, table_key):
+    t = table(table_name)
+    max_key = _max_table_keys[table_name]
+    if table_key > max_key:
+        raise KeyError()
+    while table_key not in t and table_key <= max_key:
+        table_key += 1
+    return table_key
 
 
 def _load_tables():
@@ -52,9 +65,12 @@ def _load_tables():
     spec_path = os.path.join(spec_dir, 'spec.json')
     with open(spec_path) as fp:
         tables = json.load(fp)
-    for t in tables.values():
+    for table_name, t in tables.items():
         for k, v in t.items():
             # convert keys to int
             del t[k]
-            t[int(k, 0)] = v
+            int_key = int(k, 0)
+            t[int_key] = v
+            if _max_table_keys[table_name] < int_key:
+                _max_table_keys[table_name] = int_key
     _tables = tables

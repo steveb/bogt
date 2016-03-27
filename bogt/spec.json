@@ -2013,6 +2013,19 @@
       ], 
       "size": 1
     }, 
+    "0x103a": {
+      "lookup": "0 TO 100", 
+      "address": 4154, 
+      "parameter_key": "prm_fx2_overtone_direct_level", 
+      "parameter": [
+        "PRM_FX2_OVERTONE_DIRECT_LEVEL"
+      ], 
+      "data": [
+        0, 
+        100
+      ], 
+      "size": 1
+    }, 
     "0x151": {
       "lookup": "0 TO 100", 
       "address": 337, 
@@ -17008,6 +17021,21 @@
       ], 
       "size": 1
     }, 
+    "0x87e": {
+      "lookup": "PATCH NUM", 
+      "address": 2174, 
+      "parameter_key": "midi_program_chg_map_bank3_pc_s128", 
+      "parameter": [
+        "MIDI PROGRAM CHG MAP", 
+        "BANK3", 
+        "PC#128"
+      ], 
+      "data": [
+        0, 
+        783
+      ], 
+      "size": 2
+    }, 
     "0x3": {
       "lookup": "AUTO INTERNAL", 
       "address": 3, 
@@ -30947,6 +30975,22 @@
       "data": [
         0, 
         1
+      ], 
+      "size": 1
+    }, 
+    "0x327": {
+      "lookup": "-5 TO 5", 
+      "address": 807, 
+      "parameter_key": "polyphonic_tuner_offset", 
+      "parameter": [
+        "Polyphonic Tuner Offset"
+      ], 
+      "notes": [
+        "GT-100 only"
+      ], 
+      "data": [
+        0, 
+        10
       ], 
       "size": 1
     }, 
