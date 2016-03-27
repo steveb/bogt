@@ -69,7 +69,7 @@ def _load_tables():
         for k, v in t.items():
             # convert keys to int
             del t[k]
-            int_key = int(k, 0)
+            int_key = int(k, 16)
             t[int_key] = v
             if _max_table_keys[table_name] < int_key:
                 _max_table_keys[table_name] = int_key
