@@ -31,6 +31,10 @@ def checksum_with_data(data):
     return 128 - (sum(data) % 128)
 
 
+def bytes_to_uchar(data):
+    return data[0]
+
+
 def bytes_to_ushort(data):
     return struct.unpack(
         '>H', struct.pack(
@@ -45,6 +49,10 @@ def bytes_to_uint(data):
 
 def ushort_to_bytes(data):
     return struct.unpack('BB', struct.pack('>H', data))
+
+
+def uchar_to_bytes(data):
+    return [data]
 
 
 def uint_to_bytes(data):
@@ -75,14 +83,35 @@ class ParsedSysex(object):
             self.table = spec.table(self.table_name)
             self.table_entry = self.table[self.table_key]
             self.size = self.table_entry['size']
+            self.lookup_value_data = self.body[:self.size]
             self.table_entry_label = ': '.join(self.table_entry['parameter'])
-            self.table_entry_value_label = 'thing'
+            if len(self.lookup_value_data) != self.size:
+                print('WARNING missing value data %s %s' % (
+                    self.size, self.data))
+            else:
+                if self.size == 1:
+                    self.lookup_value = bytes_to_uchar(self.lookup_value_data)
+                elif self.size == 2:
+                    self.lookup_value = bytes_to_ushort(self.lookup_value_data)
+                elif self.size == 4:
+                    self.lookup_value = bytes_to_uint(self.lookup_value_data)
+                else:
+                    raise ValueError('Unhandled size: %s' % self.size)
         except KeyError:
             self.table = None
             self.table_entry = None
             self.size = None
             self.table_entry_label = self.table_key
-            pass
+            self.lookup_value = None
+
+        if not self.table_entry:
+            return
+        try:
+            self.lookup_table = spec.table(self.table_entry['lookup'])
+            self.lookup_value_label = self.lookup_table[self.lookup_value]
+        except KeyError:
+            self.lookup_table = None
+            self.lookup_value_label = None
 
     def create_by_truncate(self):
         if not self.size:
@@ -138,5 +167,5 @@ class ParsedSysex(object):
             hex(self.address),
             self.body[:self.size],
             self.table_entry_label,
-            self.table_entry_value_label
+            self.lookup_value_label
         )
