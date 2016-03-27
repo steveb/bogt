@@ -16,102 +16,127 @@ def midi_to_parsed(midi, split=False):
     if not split:
         return parsed
 
-    # prev_ps = None
     parsed_split = []
-    # for ps in parsed:
-    #     parsed_split.extend(ps.split(prev_ps))
-    #     prev_ps = ps
+    address_remains = None
+    data_remains = None
+    for ps in parsed:
+        address_remains, data_remains = ps.split(
+            parsed_split, address_remains, data_remains)
+    for ps in parsed_split:
+        print(ps)
     return parsed_split
+
+
+def checksum_with_data(data):
+    return 128 - (sum(data) % 128)
+
+
+def bytes_to_ushort(data):
+    return struct.unpack(
+        '>H', struct.pack(
+            'BB', *data))[0]
+
+
+def bytes_to_uint(data):
+    return struct.unpack(
+        '>I', struct.pack(
+            'BBBB', *data))[0]
+
+
+def ushort_to_bytes(data):
+    return struct.unpack('BB', struct.pack('>H', data))
+
+
+def uint_to_bytes(data):
+    return struct.unpack('BBBB', struct.pack('>I', data))
 
 
 class ParsedSysex(object):
 
     def __init__(self, data):
+        self.populate_from_data(data)
+        self.populate_from_table()
+
+    def populate_from_data(self, data):
         self.data = data
 
-    @property
-    def body(self):
-        return self.data[10:-1]
+        self.is_send = self.data[5] == 0x12
+        self.is_receive = self.data[5] == 0x11
+        self.address = bytes_to_uint(self.data[6:10])
+        self.address_block = bytes_to_ushort(self.data[6:8])
+        self.table_key = bytes_to_ushort(self.data[8:10])
+        self.body = self.data[10:-1]
+        self.checksum = self.data[-1:][0]
+        self.table_name = spec.table_name(self.address_block)
 
-    @property
-    def checksum(self):
-        return self.data[-1:][0]
+    def populate_from_table(self):
 
-    def calculate_checksum(self):
-        return 128 - (sum(self.data[6:-1]) % 128)
-
-    @property
-    def size(self):
-        entry = self.table_entry()
-        return entry['size']
-
-    @property
-    def address_block(self):
-        return struct.unpack(
-            '>H', struct.pack(
-                'BB', *self.data[6:8]))[0]
-
-    @property
-    def address(self):
-        return struct.unpack(
-            '>I', struct.pack(
-                'BBBB', *self.data[6:10]))[0]
-
-    @property
-    def table_key(self):
-        return struct.unpack(
-            '>H', struct.pack(
-                'BB', *self.data[8:10]))[0]
-
-    def is_send(self):
-        return self.data[5] == 0x12
-
-    def is_receive(self):
-        return self.data[5] == 0x11
-
-    def table_entry(self):
-        table = spec.table(self.table_name)
-        return table[self.table_key]
-
-    def location_label(self):
         try:
-            entry = self.table_entry()
+            self.table = spec.table(self.table_name)
+            self.table_entry = self.table[self.table_key]
+            self.size = self.table_entry['size']
+            self.table_entry_label = ': '.join(self.table_entry['parameter'])
+            self.table_entry_value_label = 'thing'
         except KeyError:
-            log.warn('%s not in %s' % (self.table_key, self.table_name))
-            return self.table_key
-        parameter = entry['parameter']
-        return ': '.join(parameter)
+            self.table = None
+            self.table_entry = None
+            self.size = None
+            self.table_entry_label = self.table_key
+            pass
 
-    @property
-    def table_name(self):
-        block = self.address_block
-        if block == 0x0:
-            return 'SYSTEM'
-        if block == 0x2:
-            return 'MIDI'
-        return 'PATCH'
+    def create_by_truncate(self):
+        if not self.size:
+            print('NO TABLE ENTRY %s' % hex(self.address))
+            return None, None
+        size_minus_checksum = 10 + self.size
+        d = list(self.data[:size_minus_checksum])
+        d.append(checksum_with_data(d[6:]))
+        data_remains = self.data[size_minus_checksum:]
+        ps = ParsedSysex(d)
+        return ps, data_remains
 
-    def split(self, prev_ps):
+    def create_by_data_remains(self, data_remains):
         try:
-            entry = self.table_entry()
-        except KeyError:
-            print('TODO handle prev_ps')
-        print(entry)
+            next_table_key = spec.next_table_key(
+                self.table_name, self.table_key + self.size)
+            next_size = spec.table_entry(
+                self.table_name, next_table_key)['size']
+        except (KeyError, ValueError):
+            return None
+        if data_remains <= next_size + 1:
+            # not enough data to create a full packet
+            return None
+
+        d = list(self.data[:8])
+        d.extend(ushort_to_bytes(next_table_key))
+        d.extend(data_remains[:-1])
+        d.append(checksum_with_data(d[6:]))
+        ps = ParsedSysex(d)
+        return ps
+
+    def split(self, parsed_split, address_remains, data_remains):
+        large_ps = self
+        while True:
+            ps, data_remains = large_ps.create_by_truncate()
+            if not ps:
+                return None, None
+            parsed_split.append(ps)
+            if len(data_remains) < 2:
+                # if all that is left is the checksum
+                return None, None
+            # print(data_remains)
+            large_ps = large_ps.create_by_data_remains(data_remains)
+            if not large_ps:
+                print('dangling data %s' % data_remains)
+                return None, None
+
+    def calculate_checksum(self, data):
+        return self.checksum_with_data(self.data[6:-1])
 
     def __str__(self):
-        sr = '????'
-        if self.is_send():
-            sr = 'send'
-        if self.is_receive():
-            sr = 'recv'
-
-        # hexdata = ['%02x' % d for d in self.data]
-        # strhexdata = ', '.join(hexdata)
-        print(self.location_label())
-        return '%s %s %s %s: %s' % (
-            sr,
-            self.table_name,
+        return '%s: %s\n%s = %s' % (
             hex(self.address),
-            self.checksum,
-            len(self.data)
+            self.body[:self.size],
+            self.table_entry_label,
+            self.table_entry_value_label
         )
