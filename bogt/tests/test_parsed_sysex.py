@@ -6,6 +6,7 @@ import testtools
 import mido
 
 from bogt.message import parsed_sysex
+from bogt import spec
 
 test_dir = os.path.dirname(__file__)
 test_path_1 = os.path.join(test_dir, 'test_parsed_sysex_1.mid')
@@ -83,7 +84,12 @@ class TestParsedSysex(testtools.TestCase):
         parsed = parsed_sysex.midi_to_parsed(mid, split=False)
         self.assertEqual(9, len(parsed))
 
-    def test_parsed_split(self):
+    def test_parsed_split_1(self):
         mid = mido.MidiFile(test_path_1)
         parsed = parsed_sysex.midi_to_parsed(mid, split=True)
-        self.assertEqual(1015, len(parsed))
+        self.assertEqual(len(spec.patch()), len(parsed))
+
+    def test_parsed_split_2(self):
+        mid = mido.MidiFile(test_path_2)
+        parsed = parsed_sysex.midi_to_parsed(mid, split=True)
+        self.assertEqual(len(spec.patch()), len(parsed))

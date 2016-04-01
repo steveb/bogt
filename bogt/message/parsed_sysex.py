@@ -1,5 +1,6 @@
 import logging
 import struct
+import sys
 
 from bogt import spec
 
@@ -16,15 +17,22 @@ def midi_to_parsed(midi, split=False):
     if not split:
         return parsed
 
+    merged_ps = merge_parsed(parsed)
     parsed_split = []
-    address_remains = None
-    data_remains = None
-    for ps in parsed:
-        address_remains, data_remains = ps.split(
-            parsed_split, address_remains, data_remains)
+    merged_ps.split(parsed_split)
     for ps in parsed_split:
+        # print_data(ps.data)
         print(ps)
     return parsed_split
+
+
+def merge_parsed(parsed):
+    if len(parsed) < 2:
+        return parsed
+    merge_ps = parsed[0]
+    for ps in parsed[1:]:
+        merge_ps = merge_ps.create_by_merging(ps)
+    return merge_ps
 
 
 def checksum_with_data(data):
@@ -57,6 +65,14 @@ def uchar_to_bytes(data):
 
 def uint_to_bytes(data):
     return struct.unpack('BBBB', struct.pack('>I', data))
+
+
+def print_data(data):
+    sys.stdout.write('[')
+    for d in data:
+        sys.stdout.write(hex(d))
+        sys.stdout.write(', ')
+    sys.stdout.write(']\n')
 
 
 class ParsedSysex(object):
@@ -125,39 +141,52 @@ class ParsedSysex(object):
         return ps, data_remains
 
     def create_by_data_remains(self, data_remains):
+        next_address_block = self.address_block
         try:
             next_table_key = spec.next_table_key(
                 self.table_name, self.table_key + self.size)
+        except KeyError:
+            return None
+        try:
             next_size = spec.table_entry(
                 self.table_name, next_table_key)['size']
-        except (KeyError, ValueError):
+        except ValueError:
             return None
         if data_remains <= next_size + 1:
             # not enough data to create a full packet
             return None
 
-        d = list(self.data[:8])
+        d = list(self.data[:6])
+        d.extend(ushort_to_bytes(next_address_block))
         d.extend(ushort_to_bytes(next_table_key))
         d.extend(data_remains[:-1])
         d.append(checksum_with_data(d[6:]))
         ps = ParsedSysex(d)
         return ps
 
-    def split(self, parsed_split, address_remains, data_remains):
+    def create_by_merging(self, ps):
+        d = list(self.data[:10])
+        d.extend(self.body)
+        d.extend(ps.body)
+        d.append(checksum_with_data(d[6:]))
+        return ParsedSysex(d)
+
+    def split(self, parsed_split):
         large_ps = self
         while True:
             ps, data_remains = large_ps.create_by_truncate()
             if not ps:
-                return None, None
+                return
             parsed_split.append(ps)
             if len(data_remains) < 2:
                 # if all that is left is the checksum
-                return None, None
+                return
             # print(data_remains)
             large_ps = large_ps.create_by_data_remains(data_remains)
             if not large_ps:
-                print('dangling data %s' % data_remains)
-                return None, None
+                print('dangling data')
+                print_data(data_remains)
+                return
 
     def calculate_checksum(self, data):
         return self.checksum_with_data(self.data[6:-1])
