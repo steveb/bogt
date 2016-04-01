@@ -4,7 +4,7 @@ from cliff import command
 import json
 import mido
 
-from bogt.message import parsed_sysex
+from bogt import parsed_sysex
 from bogt import parsed_tsl
 
 

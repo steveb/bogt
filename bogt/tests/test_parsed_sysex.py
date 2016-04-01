@@ -5,7 +5,7 @@ import testtools
 
 import mido
 
-from bogt.message import parsed_sysex
+from bogt import parsed_sysex
 from bogt import spec
 
 test_dir = os.path.dirname(__file__)
