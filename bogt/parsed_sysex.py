@@ -1,9 +1,8 @@
 import logging
 import struct
-import sys
 
+from bogt.io import print_data
 from bogt import spec
-
 
 log = logging.getLogger(__name__)
 
@@ -65,14 +64,6 @@ def uchar_to_bytes(data):
 
 def uint_to_bytes(data):
     return struct.unpack('BBBB', struct.pack('>I', data))
-
-
-def print_data(data):
-    sys.stdout.write('[')
-    for d in data:
-        sys.stdout.write(hex(d))
-        sys.stdout.write(', ')
-    sys.stdout.write(']\n')
 
 
 class ParsedSysex(object):
