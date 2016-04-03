@@ -73,4 +73,7 @@ def _load_tables():
             t[int_key] = v
             if _max_table_keys[table_name] < int_key:
                 _max_table_keys[table_name] = int_key
+    patch_block = tables.get('USER PATCH BLOCK')
+    reverse_patch_block = dict([(v, k) for k, v in patch_block.items()])
+    tables['USER PATCH BLOCK REVERSE'] = reverse_patch_block
     _tables = tables

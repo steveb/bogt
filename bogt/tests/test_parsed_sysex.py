@@ -16,7 +16,7 @@ test_path_2 = os.path.join(test_dir, 'test_parsed_sysex_2.mid')
 class TestParseFunctions(testtools.TestCase):
 
     def test_checksum_with_data(self):
-        self.assertEqual(128,
+        self.assertEqual(0,
                          parsed_sysex.checksum_with_data([]))
         self.assertEqual(127,
                          parsed_sysex.checksum_with_data([1]))

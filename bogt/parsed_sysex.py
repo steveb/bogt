@@ -1,7 +1,7 @@
 import logging
 import struct
 
-from bogt.io import print_data
+# from bogt.io import print_data
 from bogt import spec
 
 log = logging.getLogger(__name__)
@@ -19,9 +19,9 @@ def midi_to_parsed(midi, split=False):
     merged_ps = merge_parsed(parsed)
     parsed_split = []
     merged_ps.split(parsed_split)
-    for ps in parsed_split:
-        # print_data(ps.data)
-        print(ps)
+    # for ps in parsed_split:
+    #     print_data(ps.data[:10])
+    #     # print(ps)
     return parsed_split
 
 
@@ -34,8 +34,27 @@ def merge_parsed(parsed):
     return merge_ps
 
 
+def param_to_send_data(device_id, block, address, size, value):
+    data = [
+        0x41,       # Manufacturer ID (Roland)
+        device_id,  # Dev Device ID (Dev=00H-1FH)
+        0x00,       # Model ID #1 (GT-100)
+        0x00,       # Model ID #2 (GT-100)
+        0x60,       # Model ID #3 (GT-100)
+        0x12        # Command ID (DT1)
+    ]
+    data.extend(ushort_to_bytes(block))
+    data.extend(ushort_to_bytes(address))
+    if size == 1:
+        data.append(value)
+    elif size == 2:
+        data.extend(ushort_to_bytes(value))
+    data.append(checksum_with_data(data[6:]))
+    return data
+
+
 def checksum_with_data(data):
-    return 128 - (sum(data) % 128)
+    return (128 - (sum(data) % 128)) % 128
 
 
 def bytes_to_uchar(data):
@@ -79,6 +98,8 @@ class ParsedSysex(object):
         self.is_receive = self.data[5] == 0x11
         self.address = bytes_to_uint(self.data[6:10])
         self.address_block = bytes_to_ushort(self.data[6:8])
+        self.address_block_label = spec.table(
+            'USER PATCH BLOCK')[self.address_block]
         self.table_key = bytes_to_ushort(self.data[8:10])
         self.body = self.data[10:-1]
         self.checksum = self.data[-1:][0]
@@ -93,15 +114,13 @@ class ParsedSysex(object):
             self.lookup_value_data = self.body[:self.size]
             self.table_entry_label = ': '.join(self.table_entry['parameter'])
             if len(self.lookup_value_data) != self.size:
-                print('WARNING missing value data %s %s' % (
-                    self.size, self.data))
+                print('WARNING missing value data %s %s %s' % (
+                    self.size, len(self.lookup_value_data), self.data))
             else:
                 if self.size == 1:
                     self.lookup_value = bytes_to_uchar(self.lookup_value_data)
                 elif self.size == 2:
                     self.lookup_value = bytes_to_ushort(self.lookup_value_data)
-                elif self.size == 4:
-                    self.lookup_value = bytes_to_uint(self.lookup_value_data)
                 else:
                     raise ValueError('Unhandled size: %s' % self.size)
         except KeyError:
@@ -111,14 +130,15 @@ class ParsedSysex(object):
             self.table_entry_label = self.table_key
             self.lookup_value = None
 
+        self.lookup_table = None
+        self.lookup_value_label = None
         if not self.table_entry:
             return
         try:
             self.lookup_table = spec.table(self.table_entry['lookup'])
             self.lookup_value_label = self.lookup_table[self.lookup_value]
         except KeyError:
-            self.lookup_table = None
-            self.lookup_value_label = None
+            pass
 
     def create_by_truncate(self):
         if not self.size:
@@ -175,17 +195,16 @@ class ParsedSysex(object):
             # print(data_remains)
             large_ps = large_ps.create_by_data_remains(data_remains)
             if not large_ps:
-                print('dangling data')
-                print_data(data_remains)
+                # print('dangling data')
+                # print_data(data_remains)
                 return
 
     def calculate_checksum(self, data):
         return self.checksum_with_data(self.data[6:-1])
 
     def __str__(self):
-        return '%s: %s\n%s = %s' % (
-            hex(self.address),
-            self.body[:self.size],
+        return '%s %s = %s' % (
+            self.address_block_label,
             self.table_entry_label,
             self.lookup_value_label
         )

@@ -18,8 +18,8 @@ class SendData(command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        liveset = tsl.load_tsl_from_file(parsed_args.filename)
         conf = config.load_config()
+        liveset = tsl.load_tsl_from_file(parsed_args.filename, conf)
         last_send = conf.get('last_send', {})
 
         def validate_bank(answers, value):
@@ -56,3 +56,4 @@ class SendData(command.Command):
         answer = inquirer.prompt(q)
         conf['last_send'] = answer
         config.save_config(conf)
+        liveset.to_midi(answer['patch'], answer['preset'])
