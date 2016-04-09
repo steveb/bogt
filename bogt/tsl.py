@@ -28,12 +28,14 @@ class LiveSet(object):
         patch = self.patches[patch_key]
         values = patch['params']
         upb = spec.table('USER PATCH BLOCK REVERSE')
+        byte_table = spec.table('BYTENUM TO INDEX REVERSE')
         block = upb[preset_name]
         device_id = self.conf.get('device_id', 0x00)
         pt = spec.patch()
         for address, param in sorted(pt.items()):
             param_key = param['parameter_key']
             value = values[param_key]
+            value = byte_table[value]
 
             print('\n%s = %s' % (param_key, value))
             size = param['size']

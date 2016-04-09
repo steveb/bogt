@@ -59,6 +59,12 @@ def next_table_key(table_name, table_key):
     return table_key
 
 
+def _reverse_table(tables, table_name):
+    table = tables.get(table_name)
+    reverse_table = dict([(v, k) for k, v in table.items()])
+    tables['%s REVERSE' % table_name] = reverse_table
+
+
 def _load_tables():
     global _tables
     spec_dir = os.path.dirname(__file__)
@@ -73,7 +79,6 @@ def _load_tables():
             t[int_key] = v
             if _max_table_keys[table_name] < int_key:
                 _max_table_keys[table_name] = int_key
-    patch_block = tables.get('USER PATCH BLOCK')
-    reverse_patch_block = dict([(v, k) for k, v in patch_block.items()])
-    tables['USER PATCH BLOCK REVERSE'] = reverse_patch_block
+    _reverse_table(tables, 'USER PATCH BLOCK')
+    _reverse_table(tables, 'BYTENUM TO INDEX')
     _tables = tables
