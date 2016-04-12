@@ -1,4 +1,5 @@
 import logging
+import os
 
 from cliff import command
 import inquirer
@@ -20,13 +21,52 @@ class Configure(command.Command):
 
     def take_action(self, parsed_args):
         conf = config.load_config()
-        self.prompt_api(conf)
-        io.set_backend(conf)
-        self.prompt_ports(conf)
-        config.save_config(conf)
+        if self.prompt_doit('Configure MIDI ports?'):
+            self.prompt_api(conf)
+            io.set_backend(conf)
+            self.prompt_ports(conf)
+            config.save_config(conf)
 
-        self.find_device(conf)
-        config.save_config(conf)
+        if self.prompt_doit('Configure device by connecting to it?'):
+            self.find_device(conf)
+            config.save_config(conf)
+
+        if self.prompt_doit('Find BOSS TONE STUDIO database?'):
+            self.find_bts_db(conf)
+            config.save_config(conf)
+
+    def find_bts_db(self, conf):
+        search_path = conf.get('bts_db_dir')
+        if not search_path or not os.path.exists(search_path):
+            search_path = os.path.expanduser('~/.PlayOnLinux')
+        if not os.path.isdir(search_path):
+            search_path = os.path.expanduser('~/.wine')
+        if not os.path.isdir(search_path):
+            search_path = os.path.expanduser('~')
+
+        q = [
+            inquirer.Text(
+                'search_path',
+                message='Path to search for BOSS TONE STUDIO Application Data',
+                default=search_path
+            ),
+        ]
+        answer = inquirer.prompt(q)
+        search_path = answer['search_path']
+        print('Looking for liveset.db in %s...' % search_path)
+        for root, dirnames, filenames in os.walk(search_path):
+            if 'liveset.db' in filenames:
+                print('Found liveset.db in %s' % root)
+                conf['bts_db_dir'] = root
+                return
+
+    def prompt_doit(self, prompt):
+        q = [inquirer.Confirm(
+            'doit',
+            default=True,
+            message=prompt)]
+        answer = inquirer.prompt(q)
+        return answer['doit']
 
     def find_device(self, conf):
         print('Looking for device. Ctrl-c if this takes too long...')
