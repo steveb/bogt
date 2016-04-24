@@ -10,8 +10,8 @@ class BtsDb(object):
 
     def __init__(self, conf):
         self.conf = conf
-        bts_db = os.path.join(conf['bts_db_dir'], 'liveset.db')
-        self.conn = sqlite3.connect(bts_db)
+        self.db_path = os.path.join(conf['bts_db_dir'], 'liveset.db')
+        self.conn = sqlite3.connect(self.db_path)
         self.categories = spec.table('Patch Category')
 
     def fetch_liveset_names(self):

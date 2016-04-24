@@ -23,7 +23,7 @@ def patch_to_midi(conf, patch, preset_name):
     pt = spec.patch()
     for address, param in sorted(pt.items()):
         param_key = param['parameter_key']
-        value = values[param_key]
+        value = values.get(param_key)
         value = byte_table[value]
 
         print('\n%s = %s' % (param_key, value))

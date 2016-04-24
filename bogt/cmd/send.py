@@ -3,6 +3,7 @@ import os
 import sqlite3
 
 from cliff import command
+import inotify_simple
 import inquirer
 
 from bogt import bts_db
@@ -56,8 +57,25 @@ class SendData(command.Command):
         patch_names = db.fetch_patch_names(liveset_id)
         answer = self.prompt_preset(last_send, patch_names)
         patch_id = patch_names[answer['patch']]
-        patch = db.fetch_patch(patch_id)
-        tsl.patch_to_midi(conf, patch, answer['preset'])
+        preset = answer['preset']
+
+        def get_patch():
+            return db.fetch_patch(patch_id)
+
+        tsl.patch_to_midi(conf, get_patch(), preset)
+        if parsed_args.watch:
+            self.watch(db.db_path, get_patch, preset)
+
+    def watch(self, file_path, get_patch, preset):
+        inotify = inotify_simple.INotify()
+        f = inotify_simple.flags
+        watch_flags = f.ACCESS | f.MODIFY
+        wd = inotify.add_watch(file_path, watch_flags)
+        while True:
+            for event in inotify.read():
+                print(event)
+                for flag in f.from_mask(event.mask):
+                    print('    ' + str(flag))
 
     def take_action_tls(self, parsed_args):
         conf = config.load_config()
