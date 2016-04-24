@@ -6,7 +6,6 @@ from cliff import command
 import inotify_simple
 import inquirer
 
-from bogt import bts_db
 from bogt import config
 from bogt import tsl
 
@@ -21,9 +20,7 @@ class SendData(command.Command):
         parser.add_argument(
             '--tls',
             metavar='<file>',
-            help=('Path to TLS file to select patch from. '
-                  'If not specified, will '
-                  'load configured BOSS TONE STUDIO database.')
+            help=('Path to TLS file to select patch from.')
         )
         parser.add_argument(
             '--watch',
@@ -32,39 +29,6 @@ class SendData(command.Command):
         )
 
         return parser
-
-    def take_action(self, parsed_args):
-        if parsed_args.tls:
-            self.take_action_tls(parsed_args)
-        else:
-            self.take_action_bts_db(parsed_args)
-
-    def take_action_bts_db(self, parsed_args):
-        conf = config.load_config()
-        last_send = conf.get('last_send', {})
-        db = bts_db.BtsDb(conf)
-        liveset_names = db.fetch_liveset_names()
-        q = [
-            inquirer.List(
-                'liveset',
-                message="Liveset to get patch from",
-                default=last_send.get('liveset'),
-                choices=liveset_names,
-            ),
-        ]
-        answer = inquirer.prompt(q)
-        liveset_id = liveset_names[answer['liveset']]
-        patch_names = db.fetch_patch_names(liveset_id)
-        answer = self.prompt_preset(last_send, patch_names)
-        patch_id = patch_names[answer['patch']]
-        preset = answer['preset']
-
-        def get_patch():
-            return db.fetch_patch(patch_id)
-
-        tsl.patch_to_midi(conf, get_patch(), preset)
-        if parsed_args.watch:
-            self.watch(db.db_path, get_patch, preset)
 
     def watch(self, file_path, get_patch, preset):
         inotify = inotify_simple.INotify()
@@ -77,7 +41,7 @@ class SendData(command.Command):
                 for flag in f.from_mask(event.mask):
                     print('    ' + str(flag))
 
-    def take_action_tls(self, parsed_args):
+    def take_action(self, parsed_args):
         conf = config.load_config()
         liveset = tsl.load_tsl_from_file(parsed_args.tls, conf)
         last_send = conf.get('last_send', {})
@@ -85,6 +49,12 @@ class SendData(command.Command):
         conf['last_send'] = answer
         config.save_config(conf)
         liveset.to_midi(answer['patch'], answer['preset'])
+        # def get_patch():
+        #     return db.fetch_patch(patch_id)
+
+        # tsl.patch_to_midi(conf, get_patch(), preset)
+        # if parsed_args.watch:
+        #     self.watch(db.db_path, get_patch, preset)
 
     def prompt_preset(self, last_send, patches):
         def validate_bank(answers, value):
