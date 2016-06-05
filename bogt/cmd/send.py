@@ -1,12 +1,11 @@
 import logging
-import os
-import sqlite3
 
 from cliff import command
 import inotify_simple
 import inquirer
 
 from bogt import config
+from bogt import io
 from bogt import tsl
 
 
@@ -18,14 +17,24 @@ class SendData(command.Command):
     def get_parser(self, prog_name):
         parser = super(SendData, self).get_parser(prog_name)
         parser.add_argument(
-            '--tls',
-            metavar='<file>',
-            help=('Path to TLS file to select patch from.')
+            'tsl',
+            metavar='<TSL file>',
+            help=('Path to TSL file to select patch from.')
         )
         parser.add_argument(
             '--watch',
             action='store_true',
             help=('Watch for data changes and resend patch')
+        )
+        parser.add_argument(
+            '--write',
+            action='store_true',
+            help=('Prompt for preset to write to instead of temporary memory')
+        )
+        parser.add_argument(
+            '--no-send',
+            action='store_true',
+            help=('Do not send MIDI, print debugging to console instead')
         )
 
         return parser
@@ -34,7 +43,7 @@ class SendData(command.Command):
         inotify = inotify_simple.INotify()
         f = inotify_simple.flags
         watch_flags = f.ACCESS | f.MODIFY
-        wd = inotify.add_watch(file_path, watch_flags)
+        inotify.add_watch(file_path, watch_flags)
         while True:
             for event in inotify.read():
                 print(event)
@@ -43,20 +52,39 @@ class SendData(command.Command):
 
     def take_action(self, parsed_args):
         conf = config.load_config()
-        liveset = tsl.load_tsl_from_file(parsed_args.tls, conf)
+        liveset = tsl.load_tsl_from_file(parsed_args.tsl, conf)
         last_send = conf.get('last_send', {})
-        answer = self.prompt_preset(last_send, liveset.patches)
-        conf['last_send'] = answer
+        answer = self.prompt_patch(last_send, liveset.patches)
+        patch = answer['patch']
+
+        preset = None
+        if parsed_args.write:
+            answer = self.prompt_preset(last_send)
+            preset = answer['preset']
+
         config.save_config(conf)
-        liveset.to_midi(answer['patch'], answer['preset'])
-        # def get_patch():
-        #     return db.fetch_patch(patch_id)
+        if parsed_args.no_send:
+            session = None
+        else:
+            session = io.Session(conf)
+        liveset.to_midi(session, patch, preset)
 
-        # tsl.patch_to_midi(conf, get_patch(), preset)
-        # if parsed_args.watch:
-        #     self.watch(db.db_path, get_patch, preset)
+        conf['last_send'] = last_send
 
-    def prompt_preset(self, last_send, patches):
+    def prompt_patch(self, last_send, patches):
+        q = [
+            inquirer.List(
+                'patch',
+                message="Patch to send",
+                default=last_send.get('patch'),
+                choices=patches,
+            ),
+        ]
+        answer = inquirer.prompt(q)
+        last_send.update(answer)
+        return answer
+
+    def prompt_preset(self, last_send):
         def validate_bank(answers, value):
             try:
                 i = int(value)
@@ -69,12 +97,6 @@ class SendData(command.Command):
             return ['%s-%s' % (bank, i) for i in range(1, 5)]
 
         q = [
-            inquirer.List(
-                'patch',
-                message="Patch to send",
-                default=last_send.get('patch'),
-                choices=patches,
-            ),
             inquirer.Text(
                 'bank',
                 message='User bank to write patch to (1 to 50)',
@@ -89,4 +111,5 @@ class SendData(command.Command):
             ),
         ]
         answer = inquirer.prompt(q)
+        last_send.update(answer)
         return answer
