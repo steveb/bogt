@@ -1245,7 +1245,9 @@
       "address": 4144, 
       "parameter_key": "prm_fx2_teraecho_time", 
       "parameter": [
-        "PRM_FX2_TERAECHO_TIME"
+        "FX2", 
+        "TERAECHO", 
+        "TIME"
       ], 
       "data": [
         0, 
@@ -1258,7 +1260,9 @@
       "address": 4145, 
       "parameter_key": "prm_fx2_teraecho_feedback", 
       "parameter": [
-        "PRM_FX2_TERAECHO_FEEDBACK"
+        "FX2", 
+        "TERAECHO", 
+        "FEEDBACK"
       ], 
       "data": [
         0, 
@@ -1271,7 +1275,9 @@
       "address": 4146, 
       "parameter_key": "prm_fx2_teraecho_tone", 
       "parameter": [
-        "PRM_FX2_TERAECHO_TONE"
+        "FX2", 
+        "TERAECHO", 
+        "TONE"
       ], 
       "data": [
         0, 
@@ -1284,7 +1290,9 @@
       "address": 4147, 
       "parameter_key": "prm_fx2_teraecho_effect_level", 
       "parameter": [
-        "PRM_FX2_TERAECHO_EFFECT_LEVEL"
+        "FX2", 
+        "TERAECHO", 
+        "EFFECT_LEVEL"
       ], 
       "data": [
         0, 
@@ -1297,11 +1305,28 @@
       "address": 4148, 
       "parameter_key": "prm_fx2_teraecho_hold", 
       "parameter": [
-        "PRM_FX2_TERAECHO_HOLD"
+        "FX2", 
+        "TERAECHO", 
+        "HOLD"
       ], 
       "data": [
         0, 
         1
+      ], 
+      "size": 1
+    }, 
+    "0x1035": {
+      "lookup": "0 TO 100", 
+      "address": 4149, 
+      "parameter_key": "prm_fx2_teraecho_direct_mix", 
+      "parameter": [
+        "FX2", 
+        "TERAECHO", 
+        "DIRECT_MIX"
+      ], 
+      "data": [
+        0, 
+        100
       ], 
       "size": 1
     }, 
@@ -1310,7 +1335,9 @@
       "address": 4150, 
       "parameter_key": "prm_fx2_overtone_detune", 
       "parameter": [
-        "PRM_FX2_OVERTONE_DETUNE"
+        "FX2", 
+        "OVERTONE", 
+        "DETUNE"
       ], 
       "data": [
         0, 
@@ -1323,7 +1350,9 @@
       "address": 4151, 
       "parameter_key": "prm_fx2_overtone_tone", 
       "parameter": [
-        "PRM_FX2_OVERTONE_TONE"
+        "FX2", 
+        "OVERTONE", 
+        "TONE"
       ], 
       "data": [
         0, 
@@ -1336,7 +1365,9 @@
       "address": 4152, 
       "parameter_key": "prm_fx2_overtone_upper_level", 
       "parameter": [
-        "PRM_FX2_OVERTONE_UPPER_LEVEL"
+        "FX2", 
+        "OVERTONE", 
+        "UPPER_LEVEL"
       ], 
       "data": [
         0, 
@@ -1349,7 +1380,9 @@
       "address": 4153, 
       "parameter_key": "prm_fx2_overtone_lower_level", 
       "parameter": [
-        "PRM_FX2_OVERTONE_LOWER_LEVEL"
+        "FX2", 
+        "OVERTONE", 
+        "LOWER_LEVEL"
       ], 
       "data": [
         0, 
@@ -2018,7 +2051,9 @@
       "address": 4154, 
       "parameter_key": "prm_fx2_overtone_direct_level", 
       "parameter": [
-        "PRM_FX2_OVERTONE_DIRECT_LEVEL"
+        "FX2", 
+        "OVERTONE", 
+        "DIRECT_LEVEL"
       ], 
       "data": [
         0, 
@@ -4962,7 +4997,9 @@
       "address": 4143, 
       "parameter_key": "prm_fx2_teraecho_mode", 
       "parameter": [
-        "PRM_FX2_TERAECHO_MODE"
+        "FX2", 
+        "TERAECHO", 
+        "MODE"
       ], 
       "data": [
         0, 
@@ -5468,6 +5505,20 @@
         "FX2", 
         "ACSIM", 
         "LEVEL"
+      ], 
+      "data": [
+        0, 
+        100
+      ], 
+      "size": 1
+    }, 
+    "0x659": {
+      "lookup": "0 TO 100", 
+      "address": 1625, 
+      "parameter_key": "send_return_adjust", 
+      "parameter": [
+        "SEND/RETURN", 
+        "ADJUST"
       ], 
       "data": [
         0, 
@@ -6574,7 +6625,7 @@
       "size": 1
     }, 
     "0x141": {
-      "lookup": "FX TYPE", 
+      "lookup": "FX1 TYPE", 
       "address": 321, 
       "parameter_key": "fx1_fx_type", 
       "parameter": [
@@ -10489,7 +10540,7 @@
       "size": 1
     }, 
     "0x34d": {
-      "lookup": "FX TYPE", 
+      "lookup": "FX2 TYPE", 
       "address": 845, 
       "parameter_key": "fx2_fx_type", 
       "parameter": [
@@ -16006,6 +16057,49 @@
     "4": "PLATE", 
     "5": "SPRING", 
     "6": "MODURATE"
+  }, 
+  "MUTE 20DB": {
+    "0": "MUTE", 
+    "1": "-19dB", 
+    "2": "-18dB", 
+    "3": "-17dB", 
+    "4": "-16dB", 
+    "5": "-15dB", 
+    "6": "-14dB", 
+    "7": "-13dB", 
+    "8": "-12dB", 
+    "9": "-11dB", 
+    "10": "-10dB", 
+    "11": "-9dB", 
+    "12": "-8dB", 
+    "13": "-7dB", 
+    "14": "-6dB", 
+    "15": "-5dB", 
+    "16": "-4dB", 
+    "17": "-3dB", 
+    "18": "-2dB", 
+    "19": "-1dB", 
+    "20": "0dB", 
+    "21": "1dB", 
+    "22": "2dB", 
+    "23": "3dB", 
+    "24": "4dB", 
+    "25": "5dB", 
+    "26": "6dB", 
+    "27": "7dB", 
+    "28": "8dB", 
+    "29": "9dB", 
+    "30": "10dB", 
+    "31": "11dB", 
+    "32": "12dB", 
+    "33": "13dB", 
+    "34": "14dB", 
+    "35": "15dB", 
+    "36": "16dB", 
+    "37": "17dB", 
+    "38": "18dB", 
+    "39": "19dB", 
+    "40": "20dB"
   }, 
   "AC PROC TYPE": {
     "0": "SMALL", 
@@ -24669,43 +24763,6 @@
     "0": "OFF (STOP )", 
     "1": "ON  (START)"
   }, 
-  "FX TYPE": {
-    "0": "T.WAH", 
-    "1": "AUTO WAH", 
-    "2": "SUB WAH", 
-    "3": "ADV.COMP", 
-    "4": "LIMITER", 
-    "5": "SUB OD/DS", 
-    "6": "GRAPHIC EQ", 
-    "7": "PARAMETRIC EQ", 
-    "8": "TONE MODIFY", 
-    "9": "GUITAR SIM", 
-    "10": "SLOW GEAR", 
-    "11": "DEFRETTER", 
-    "12": "WAVE SYNTH", 
-    "13": "SITAR SIM", 
-    "14": "OCTAVE", 
-    "15": "PITCH SHIFTER", 
-    "16": "HARMONIST", 
-    "17": "SOUND HOLD", 
-    "18": "AC.PROCESSOR", 
-    "19": "PHASER", 
-    "20": "FLANGER", 
-    "21": "TREMOLO", 
-    "22": "ROTARY 1", 
-    "23": "UNI-V", 
-    "24": "PAN", 
-    "25": "SLICER", 
-    "26": "VIBRATO", 
-    "27": "RING MOD", 
-    "28": "HUMANIZER", 
-    "29": "2X2 CHORUS", 
-    "30": "SUB DELAY", 
-    "31": "AC SIM", 
-    "32": "ROTARY 2", 
-    "33": "TERAECHO  *FX2 only", 
-    "34": "OVERTONE  *FX2 only"
-  }, 
   "KNOB SETTING": {
     "0": "OFF", 
     "1": "PATCH", 
@@ -30122,9 +30179,40 @@
     "3": "CND87", 
     "4": "FLAT"
   }, 
-  "SLOW FAST": {
-    "0": "SLOW", 
-    "1": "FAST"
+  "FX1 TYPE": {
+    "0": "T.WAH", 
+    "1": "AUTO WAH", 
+    "2": "SUB WAH", 
+    "3": "ADV.COMP", 
+    "4": "LIMITER", 
+    "5": "SUB OD/DS", 
+    "6": "GRAPHIC EQ", 
+    "7": "PARAMETRIC EQ", 
+    "8": "TONE MODIFY", 
+    "9": "GUITAR SIM", 
+    "10": "SLOW GEAR", 
+    "11": "DEFRETTER", 
+    "12": "WAVE SYNTH", 
+    "13": "SITAR SIM", 
+    "14": "OCTAVE", 
+    "15": "PITCH SHIFTER", 
+    "16": "HARMONIST", 
+    "17": "SOUND HOLD", 
+    "18": "AC.PROCESSOR", 
+    "19": "PHASER", 
+    "20": "FLANGER", 
+    "21": "TREMOLO", 
+    "22": "ROTARY", 
+    "23": "UNI-V", 
+    "24": "PAN", 
+    "25": "SLICER", 
+    "26": "VIBRATO", 
+    "27": "RING MOD", 
+    "28": "HUMANIZER", 
+    "29": "2x2 CHORUS", 
+    "30": "SUB DELAY", 
+    "31": "ACSIM", 
+    "32": "ROTARY2"
   }, 
   "ASSIGN INT PDL TRIGGER": {
     "0": "PATCH CHANGE", 
@@ -30767,48 +30855,46 @@
     "2": "x4", 
     "3": "x8"
   }, 
-  "MUTE 20DB": {
-    "0": "MUTE", 
-    "1": "-19dB", 
-    "2": "-18dB", 
-    "3": "-17dB", 
-    "4": "-16dB", 
-    "5": "-15dB", 
-    "6": "-14dB", 
-    "7": "-13dB", 
-    "8": "-12dB", 
-    "9": "-11dB", 
-    "10": "-10dB", 
-    "11": "-9dB", 
-    "12": "-8dB", 
-    "13": "-7dB", 
-    "14": "-6dB", 
-    "15": "-5dB", 
-    "16": "-4dB", 
-    "17": "-3dB", 
-    "18": "-2dB", 
-    "19": "-1dB", 
-    "20": "0dB", 
-    "21": "1dB", 
-    "22": "2dB", 
-    "23": "3dB", 
-    "24": "4dB", 
-    "25": "5dB", 
-    "26": "6dB", 
-    "27": "7dB", 
-    "28": "8dB", 
-    "29": "9dB", 
-    "30": "10dB", 
-    "31": "11dB", 
-    "32": "12dB", 
-    "33": "13dB", 
-    "34": "14dB", 
-    "35": "15dB", 
-    "36": "16dB", 
-    "37": "17dB", 
-    "38": "18dB", 
-    "39": "19dB", 
-    "40": "20dB"
+  "FX2 TYPE": {
+    "0": "T.WAH", 
+    "1": "AUTO WAH", 
+    "2": "SUB WAH", 
+    "3": "ADV.COMP", 
+    "4": "LIMITER", 
+    "5": "SUB OD/DS", 
+    "6": "GRAPHIC EQ", 
+    "7": "PARAMETRIC EQ", 
+    "8": "TONE MODIFY", 
+    "9": "GUITAR SIM", 
+    "10": "SLOW GEAR", 
+    "11": "DEFRETTER", 
+    "12": "WAVE SYNTH", 
+    "13": "SITAR SIM", 
+    "14": "OCTAVE", 
+    "15": "PITCH SHIFTER", 
+    "16": "HARMONIST", 
+    "17": "SOUND HOLD", 
+    "18": "AC.PROCESSOR", 
+    "19": "PHASER", 
+    "20": "FLANGER", 
+    "21": "TREMOLO", 
+    "22": "ROTARY", 
+    "23": "UNI-V", 
+    "24": "PAN", 
+    "25": "SLICER", 
+    "26": "VIBRATO", 
+    "27": "RING MOD", 
+    "28": "HUMANIZER", 
+    "29": "2x2 CHORUS", 
+    "30": "SUB DELAY", 
+    "31": "ACSIM", 
+    "32": "ROTARY2", 
+    "33": "TERAECHO", 
+    "34": "OVERTONE"
+  }, 
+  "SLOW FAST": {
+    "0": "SLOW", 
+    "1": "FAST"
   }, 
   "REVERB TIME": {
     "0": "0.1s", 
