@@ -9,9 +9,28 @@ from bogt import parsed_sysex
 from bogt import spec
 
 
+EMPTY_LIVESET = {
+    "version": "1.0.0",
+    "liveSetData": {
+        "orderNumber": 1,
+        "path": None,
+        "image": None,
+        "id": "",
+        "name": "",
+        "url": None
+    },
+    "patchList": [],
+    "device": "GT"
+}
+
+
 def load_tsl_from_file(path, conf):
     with open(path) as f:
-        return LiveSet(json.load(f), conf)
+        return LiveSet(conf, json.load(f))
+
+
+def empty_tsl(conf):
+    return LiveSet(conf)
 
 
 def patch_to_midi(conf, session, patch, preset_name):
@@ -33,26 +52,34 @@ def patch_to_midi(conf, session, patch, preset_name):
         address = param['address']
         msg_data = parsed_sysex.param_to_send_data(
             device_id, block, address, size, value)
-        io.print_data(msg_data)
         msg = mido.Message('sysex', data=msg_data)
         if session:
             session.port_out.send(msg)
         else:
-            print('\n%s = %s' % (param_key, value))
-            print(parsed_sysex.ParsedSysex(msg_data))
-            print(msg)
+            print('%s = %s' % (param_key, value))
+            # print(parsed_sysex.ParsedSysex(msg_data))
+            # print(msg)
+            # io.print_data(msg_data)
 
 
 class LiveSet(object):
 
-    def __init__(self, data, conf):
-        self.data = data
+    def __init__(self, conf, data=None):
+        self.data = data or EMPTY_LIVESET
         self.conf = conf
         self.patches = collections.OrderedDict()
-        for p in data.get('patchList', []):
-            key = '%s: %s' % (p.get('orderNumber'), p.get('name').strip())
-            self.patches[key] = p
+        for p in self.data['patchList']:
+            self._add_patch(p)
+        self.data['patchList'] = self.patches.items()
 
-    def to_midi(self, session, patch_key, preset_name):
+    def _add_patch(self, p):
+        key = '%s: %s' % (p.get('orderNumber'), p.get('name').strip())
+        self.patches[key] = p
+
+    def add_patch(self, p):
+        self._add_patch(p)
+        self.data['patchList'] = self.patches.items()
+
+    def to_midi(self, session, patch_key, preset_name=None):
         patch = self.patches[patch_key]
         patch_to_midi(self.conf, session, patch, preset_name)

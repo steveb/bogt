@@ -59,6 +59,12 @@ def next_table_key(table_name, table_key):
     return table_key
 
 
+def table_for_parameter_key(parameter_key):
+    for v in patch().values():
+        if v['parameter_key'] == parameter_key:
+            return table(v['lookup'])
+
+
 def _reverse_table(tables, table_name):
     table = tables.get(table_name)
     reverse_table = dict([(v, k) for k, v in table.items()])

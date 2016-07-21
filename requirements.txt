@@ -7,3 +7,7 @@ cliff
 inquirer
 inotify_simple
 enum34
+numpy
+sounddevice
+wavefile
+python-slugify
