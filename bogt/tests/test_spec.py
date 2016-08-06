@@ -9,7 +9,7 @@ class TestSpec(testtools.TestCase):
     def test_tables(self):
         self.assertEqual(527, len(spec.midi()))
         self.assertEqual(271, len(spec.system()))
-        self.assertEqual(882, len(spec.patch()))
+        self.assertEqual(884, len(spec.patch()))
 
     def test_max_table_keys(self):
         self.assertEqual(0x327, spec._max_table_keys['SYSTEM'])
