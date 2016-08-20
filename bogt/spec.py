@@ -51,12 +51,15 @@ def table_entry(table_name, table_key):
 
 def next_table_key(table_name, table_key):
     t = table(table_name)
-    max_key = _max_table_keys[table_name]
-    if table_key > max_key:
+    if table_key > max_key(table_name):
         raise KeyError()
-    while table_key not in t and table_key <= max_key:
+    while table_key not in t and table_key <= max_key(table_name):
         table_key += 1
     return table_key
+
+
+def max_key(table_name):
+    return _max_table_keys[table_name]
 
 
 def table_for_parameter_key(parameter_key):

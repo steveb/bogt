@@ -34,25 +34,6 @@ def merge_parsed(parsed):
     return merge_ps
 
 
-def param_to_send_data(device_id, block, address, size, value):
-    data = [
-        0x41,       # Manufacturer ID (Roland)
-        device_id,  # Dev Device ID (Dev=00H-1FH)
-        0x00,       # Model ID #1 (GT-100)
-        0x00,       # Model ID #2 (GT-100)
-        0x60,       # Model ID #3 (GT-100)
-        0x12        # Command ID (DT1)
-    ]
-    data.extend(ushort_to_bytes(block))
-    data.extend(ushort_to_bytes(address))
-    if size == 1:
-        data.append(value)
-    elif size == 2:
-        data.extend(ushort_to_bytes(value))
-    data.append(checksum_with_data(data[6:]))
-    return data
-
-
 def checksum_with_data(data):
     return (128 - (sum(data) % 128)) % 128
 

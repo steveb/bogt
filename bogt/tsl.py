@@ -2,10 +2,7 @@
 import collections
 import json
 
-import mido
-
 from bogt import io  # noqa
-from bogt import parsed_sysex
 from bogt import spec
 
 
@@ -33,35 +30,6 @@ def empty_tsl(conf):
     return LiveSet(conf)
 
 
-def patch_to_midi(conf, session, patch, preset_name):
-    values = patch['params']
-    if not preset_name:
-        preset_name = "TEMPORARY PATCH"
-
-    upb = spec.table('USER PATCH BLOCK REVERSE')
-    byte_table = spec.table('BYTENUM TO INDEX REVERSE')
-    block = upb[preset_name]
-    device_id = conf.get('device_id', 0x00)
-    pt = spec.patch()
-    for address, param in sorted(pt.items()):
-        param_key = param['parameter_key']
-        value = values.get(param_key)
-        value = byte_table[value]
-
-        size = param['size']
-        address = param['address']
-        msg_data = parsed_sysex.param_to_send_data(
-            device_id, block, address, size, value)
-        msg = mido.Message('sysex', data=msg_data)
-        if session:
-            session.port_out.send(msg)
-        else:
-            print('%s = %s' % (param_key, value))
-            # print(parsed_sysex.ParsedSysex(msg_data))
-            # print(msg)
-            # io.print_data(msg_data)
-
-
 class LiveSet(object):
 
     def __init__(self, conf, data=None):
@@ -82,7 +50,7 @@ class LiveSet(object):
 
     def to_midi(self, session, patch_key, preset_name=None):
         patch = self.patches[patch_key]
-        patch_to_midi(self.conf, session, patch, preset_name)
+        session.patch_to_midi(patch, preset_name)
 
     def to_file(self, path):
         with open(path, 'w') as f:

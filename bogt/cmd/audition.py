@@ -66,10 +66,7 @@ class Audition(command.Command):
         sr, d = wavefile.load(parsed_args.sample)
         self.sample_rate = sr
         self.play_data = d.T
-        if parsed_args.no_send:
-            self.session = None
-        else:
-            self.session = io.Session(self.conf)
+        self.session = io.Session(self.conf, fake=parsed_args.no_send)
         self.audition()
 
     def prep_dest(self, dest):

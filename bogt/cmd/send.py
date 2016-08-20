@@ -27,7 +27,7 @@ class SendData(command.Command):
             help=('Watch for data changes and resend patch')
         )
         parser.add_argument(
-            '--write',
+            '--preset',
             action='store_true',
             help=('Prompt for preset to write to instead of temporary memory')
         )
@@ -58,15 +58,12 @@ class SendData(command.Command):
         patch = answer['patch']
 
         preset = None
-        if parsed_args.write:
+        if parsed_args.preset:
             answer = self.prompt_preset(last_send)
             preset = answer['preset']
 
         config.save_config(conf)
-        if parsed_args.no_send:
-            session = None
-        else:
-            session = io.Session(conf)
+        session = io.Session(conf, fake=parsed_args.no_send)
         liveset.to_midi(session, patch, preset)
 
         conf['last_send'] = last_send
