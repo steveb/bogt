@@ -1,11 +1,12 @@
 import logging
+import sys
 
 from cliff import command
 import inquirer
 
 from bogt import config
 from bogt import io
-# from bogt import tsl
+from bogt import tsl
 
 
 class ReceiveData(command.Command):
@@ -35,9 +36,9 @@ class ReceiveData(command.Command):
             last_receive = conf.get('last_receive', {})
             answer = self.prompt_preset(last_receive)
             preset = answer['preset']
-        print(preset)
         session = io.Session(conf)
-        session.receive_preset(preset)
+        patch = session.receive_preset(preset)
+        tsl.write_patch_order(patch, sys.stdout)
 
     def prompt_preset(self, last_receive):
         def validate_bank(answers, value):
