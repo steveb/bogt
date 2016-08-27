@@ -119,6 +119,9 @@ def populate_unused_fields(patch):
 
 class Session(object):
 
+    port_in = None
+    port_out = None
+
     def __init__(self, conf, fake=False):
         self.conf = conf
         if not fake:
@@ -223,8 +226,8 @@ class Session(object):
             msg = mido.Message('sysex', data=msg_data)
             if self.port_out:
                 self.port_out.send(msg)
-            else:
-                print('%s = %s' % (param_key, value))
+            # else:
+            #     print('%s = %s' % (param_key, value))
                 # print(ps.ParsedSysex(msg_data))
                 # print(msg)
                 # io.print_data(msg_data)

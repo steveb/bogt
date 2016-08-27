@@ -1,6 +1,8 @@
 
 import collections
+import copy
 import json
+import os
 
 from bogt import io  # noqa
 from bogt import spec
@@ -22,12 +24,12 @@ EMPTY_LIVESET = {
 
 
 def load_tsl_from_file(path, conf):
-    with open(path) as f:
-        return LiveSet(conf, json.load(f))
-
-
-def empty_tsl(conf):
-    return LiveSet(conf)
+    if os.path.isfile(path):
+        with open(path) as f:
+            return LiveSet(conf, json.load(f))
+    if os.path.exists(path):
+        raise Exception('%s is not a file' % path)
+    return LiveSet(conf, path=path)
 
 
 def write_patch_order(patch, info_out):
@@ -85,26 +87,34 @@ def write_patch_order(patch, info_out):
 
 class LiveSet(object):
 
-    def __init__(self, conf, data=None):
-        self.data = data or EMPTY_LIVESET
+    def __init__(self, conf, data=None, path=None):
+        self.data = data or dict(EMPTY_LIVESET)
         self.conf = conf
+        self.path = path
         self.patches = collections.OrderedDict()
         for p in self.data['patchList']:
             self._add_patch(p)
-        self.data['patchList'] = self.patches.values()
+        self._sync_data()
 
     def _add_patch(self, p):
-        key = '%s: %s' % (p.get('orderNumber'), p.get('name').strip())
+        order_num = len(self.patches) + 1
+        p['orderNumber'] = order_num
+        key = '%s: %s' % (order_num, p.get('name').strip())
         self.patches[key] = p
+        return key
+
+    def _sync_data(self):
+        self.data['patchList'] = self.patches.values()
 
     def add_patch(self, p):
-        self._add_patch(p)
-        self.data['patchList'] = self.patches.values()
+        key = self._add_patch(copy.deepcopy(p))
+        self._sync_data()
+        return key
 
     def to_midi(self, session, patch_key, preset_name=None):
         patch = self.patches[patch_key]
         session.patch_to_midi(patch, preset_name)
 
-    def to_file(self, path):
-        with open(path, 'w') as f:
+    def store(self):
+        with open(self.path, 'w') as f:
             json.dump(self.data, f, indent=2)

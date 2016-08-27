@@ -4,6 +4,7 @@ from cliff import command
 import inquirer
 
 from bogt import config
+from bogt import io
 from bogt import tsl
 
 
@@ -15,17 +16,22 @@ class SortPatches(command.Command):
     def get_parser(self, prog_name):
         parser = super(SortPatches, self).get_parser(prog_name)
         parser.add_argument(
-            'tsl',
+            '--tsl',
             metavar='<from TSL file>',
-            help=('Path to TSL file to send patches from.')
+            help=('Path to source TSL containing patches.')
         )
         parser.add_argument(
-            '--out',
-            action='append',
+            'out',
+            nargs='+',
             metavar='<to TSL files...>',
             help=('Path of TSL file to append sorted patches to. Can be '
                   'specified multiple times.')
         )
+        # parser.add_argument(
+        #     '--remove',
+        #     action='store_true',
+        #     help=('Remove from source TSL once sorted')
+        # )
         parser.add_argument(
             '--no-send',
             action='store_true',
@@ -37,31 +43,25 @@ class SortPatches(command.Command):
     def take_action(self, parsed_args):
         conf = config.load_config()
         liveset = tsl.load_tsl_from_file(parsed_args.tsl, conf)
-        answer = self.prompt_patch({}, liveset.patches)
-        patch = answer['patch']
+        outs = {out: tsl.load_tsl_from_file(out, conf)
+                for out in parsed_args.out}
+        for name, patch in liveset.patches.items():
+            print(name)
+            session = io.Session(conf, fake=parsed_args.no_send)
+            liveset.to_midi(session, name)
+            out = self.prompt_out(parsed_args.out)
+            out_ls = outs[out]
+            out_ls.add_patch(patch)
+            out_ls.store()
 
-        preset = None
-        print(parsed_args.out)
-        # if parsed_args.write:
-        #     answer = self.prompt_preset(last_send)
-        #     preset = answer['preset']
-
-        # config.save_config(conf)
-        # if parsed_args.no_send:
-        #     session = None
-        # else:
-        #     session = io.Session(conf)
-        # liveset.to_midi(session, patch, preset)
-
-    def prompt_patch(self, last_send, patches):
+    def prompt_out(self, outs):
         q = [
             inquirer.List(
-                'patch',
-                message="Patch to send",
-                default=last_send.get('patch'),
-                choices=patches,
+                'out',
+                message="Sort to file",
+                default=outs[0],
+                choices=outs,
             ),
         ]
         answer = inquirer.prompt(q)
-        last_send.update(answer)
-        return answer
+        return answer['out']
