@@ -26,7 +26,7 @@ EMPTY_LIVESET = {
 def load_tsl_from_file(path, conf):
     if os.path.isfile(path):
         with open(path) as f:
-            return LiveSet(conf, json.load(f))
+            return LiveSet(conf, json.load(f), path=path)
     if os.path.exists(path):
         raise Exception('%s is not a file' % path)
     return LiveSet(conf, path=path)
@@ -110,6 +110,14 @@ class LiveSet(object):
         key = self._add_patch(copy.deepcopy(p))
         self._sync_data()
         return key
+
+    def remove_patch(self, patch_key):
+        del self.patches[patch_key]
+        i = 1
+        for p in self.patches.itervalues():
+            p['orderNumber'] = i
+            i += 1
+        self._sync_data()
 
     def to_midi(self, session, patch_key, preset_name=None):
         patch = self.patches[patch_key]

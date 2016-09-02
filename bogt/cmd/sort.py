@@ -27,11 +27,11 @@ class SortPatches(command.Command):
             help=('Path of TSL file to append sorted patches to. Can be '
                   'specified multiple times.')
         )
-        # parser.add_argument(
-        #     '--remove',
-        #     action='store_true',
-        #     help=('Remove from source TSL once sorted')
-        # )
+        parser.add_argument(
+            '--remove',
+            action='store_true',
+            help=('Remove from source TSL once sorted')
+        )
         parser.add_argument(
             '--no-send',
             action='store_true',
@@ -53,6 +53,10 @@ class SortPatches(command.Command):
             out_ls = outs[out]
             out_ls.add_patch(patch)
             out_ls.store()
+
+            if parsed_args.remove:
+                liveset.remove_patch(name)
+                liveset.store()
 
     def prompt_out(self, outs):
         q = [
