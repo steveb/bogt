@@ -2,6 +2,7 @@
 import collections
 import random
 import sys
+import time
 
 import mido
 
@@ -229,6 +230,8 @@ class Session(object):
             msg = mido.Message('sysex', data=msg_data)
             if self.port_out:
                 self.port_out.send(msg)
+                # wait for device to repond to things again
+                time.sleep(0.001)
             # else:
             #     print('%s = %s' % (param_key, value))
                 # print(ps.ParsedSysex(msg_data))
