@@ -1301,23 +1301,8 @@
       "size": 1
     }, 
     "0x1034": {
-      "lookup": "OFF ON", 
-      "address": 4148, 
-      "parameter_key": "prm_fx2_teraecho_hold", 
-      "parameter": [
-        "FX2", 
-        "TERAECHO", 
-        "HOLD"
-      ], 
-      "data": [
-        0, 
-        1
-      ], 
-      "size": 1
-    }, 
-    "0x1035": {
       "lookup": "0 TO 100", 
-      "address": 4149, 
+      "address": 4148, 
       "parameter_key": "prm_fx2_teraecho_direct_mix", 
       "parameter": [
         "FX2", 
@@ -1327,6 +1312,21 @@
       "data": [
         0, 
         100
+      ], 
+      "size": 1
+    }, 
+    "0x1035": {
+      "lookup": "OFF ON", 
+      "address": 4149, 
+      "parameter_key": "prm_fx2_teraecho_hold", 
+      "parameter": [
+        "FX2", 
+        "TERAECHO", 
+        "HOLD"
+      ], 
+      "data": [
+        0, 
+        1
       ], 
       "size": 1
     }, 
