@@ -36,6 +36,11 @@ class SendData(command.Command):
             action='store_true',
             help=('Do not send MIDI, print debugging to console instead')
         )
+        parser.add_argument(
+            '--verify',
+            action='store_true',
+            help=('Fetch the patch after sending and confirm correct values')
+        )
 
         return parser
 
@@ -52,9 +57,9 @@ class SendData(command.Command):
 
     def take_action(self, parsed_args):
         conf = config.load_config()
-        liveset = tsl.load_tsl_from_file(parsed_args.tsl, conf)
+        self.liveset = tsl.load_tsl_from_file(parsed_args.tsl, conf)
         last_send = conf.get('last_send', {})
-        answer = self.prompt_patch(last_send, liveset.patches)
+        answer = self.prompt_patch(last_send, self.liveset.patches)
         patch = answer['patch']
 
         preset = None
@@ -63,10 +68,32 @@ class SendData(command.Command):
             preset = answer['preset']
 
         config.save_config(conf)
-        session = io.Session(conf, fake=parsed_args.no_send)
-        liveset.to_midi(session, patch, preset)
+        self.session = io.Session(conf, fake=parsed_args.no_send)
+        self.liveset.to_midi(self.session, patch, preset)
 
         conf['last_send'] = last_send
+        if parsed_args.verify:
+            self.verify(patch, preset)
+
+    def verify(self, patch, preset):
+        local_data = self.liveset.patches[patch]['params']
+        fetched_data = self.session.receive_preset(preset)['params']
+        ignore_params = (
+            'currentPatchNo', 'pitch_detection', 'prevCurrentPatchNo'
+        )
+        fail_count = 0
+        for k, v in sorted(local_data.items()):
+            if k in ignore_params:
+                continue
+            # ignore gui knob range limits
+            if k[-2:] in ('_l', '_h'):
+                continue
+            fv = fetched_data.get(k)
+            if v != fv:
+                print('%s = %s, expected %s' % (k, fv, v))
+                fail_count += 1
+        if not fail_count:
+            print('All values correct!')
 
     def prompt_patch(self, last_send, patches):
         q = [
