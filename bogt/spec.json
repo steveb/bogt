@@ -1330,9 +1330,9 @@
       ], 
       "size": 1
     }, 
-    "0x1036": {
+    "0x1037": {
       "lookup": "0 TO 100", 
-      "address": 4150, 
+      "address": 4151, 
       "parameter_key": "prm_fx2_overtone_detune", 
       "parameter": [
         "FX2", 
@@ -1345,9 +1345,9 @@
       ], 
       "size": 1
     }, 
-    "0x1037": {
+    "0x1038": {
       "lookup": "-50 TO 50", 
-      "address": 4151, 
+      "address": 4152, 
       "parameter_key": "prm_fx2_overtone_tone", 
       "parameter": [
         "FX2", 
@@ -1360,29 +1360,14 @@
       ], 
       "size": 1
     }, 
-    "0x1038": {
+    "0x1039": {
       "lookup": "0 TO 100", 
-      "address": 4152, 
+      "address": 4153, 
       "parameter_key": "prm_fx2_overtone_upper_level", 
       "parameter": [
         "FX2", 
         "OVERTONE", 
         "UPPER_LEVEL"
-      ], 
-      "data": [
-        0, 
-        100
-      ], 
-      "size": 1
-    }, 
-    "0x1039": {
-      "lookup": "0 TO 100", 
-      "address": 4153, 
-      "parameter_key": "prm_fx2_overtone_lower_level", 
-      "parameter": [
-        "FX2", 
-        "OVERTONE", 
-        "LOWER_LEVEL"
       ], 
       "data": [
         0, 
@@ -2049,6 +2034,21 @@
     "0x103a": {
       "lookup": "0 TO 100", 
       "address": 4154, 
+      "parameter_key": "prm_fx2_overtone_lower_level", 
+      "parameter": [
+        "FX2", 
+        "OVERTONE", 
+        "LOWER_LEVEL"
+      ], 
+      "data": [
+        0, 
+        100
+      ], 
+      "size": 1
+    }, 
+    "0x103b": {
+      "lookup": "0 TO 100", 
+      "address": 4155, 
       "parameter_key": "prm_fx2_overtone_direct_level", 
       "parameter": [
         "FX2", 
