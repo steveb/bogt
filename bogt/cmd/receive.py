@@ -39,6 +39,9 @@ class ReceiveData(command.Command):
         session = io.Session(conf)
         patch = session.receive_preset(preset)
         tsl.write_patch_order(patch, sys.stdout)
+        liveset = tsl.load_tsl_from_file(parsed_args.tsl, conf)
+        liveset.add_patch(patch)
+        liveset.store()
 
     def prompt_preset(self, last_receive):
         def validate_bank(answers, value):
