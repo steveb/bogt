@@ -134,6 +134,7 @@ class Session(object):
             preset_name = "TEMPORARY PATCH"
         upb = spec.table('USER PATCH BLOCK REVERSE')
         byte_table = spec.table('BYTENUM TO INDEX REVERSE')
+        index_table = spec.table('BYTENUM TO INDEX')
         block = upb[preset_name]
         param_data = {}
         patch = {
@@ -153,7 +154,8 @@ class Session(object):
             return match == prefix
 
         # drain any pending data, we don't need it
-        all(self.port_in.iter_pending())
+        for d in self.port_in.iter_pending():
+            pass
 
         # request in chunks of MSB resolution, maximum 128 bytes per chunk
         msb_map = collections.defaultdict(list)
@@ -189,7 +191,8 @@ class Session(object):
                 if param['size'] == 1:
                     value = ps.bytes_to_uchar(data[index:index + 1])
                 else:
-                    value = ps.bytes_to_ushort(data[index:index + 2])
+                    value = index_table[ps.bytes_to_ushort(
+                        data[index:index + 2])]
                 param_data[param_key] = value
                 # lookup_name = param['lookup']
                 # lookup_table = spec.table(lookup_name)
